@@ -1,27 +1,58 @@
 #include "common.h"
-#include "stdlib.h"
 #include "test_esp8266.h"
-/////////////////////////////////////////////////////////////////////////////////////////////////////////// 
-//本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK STM32开发板
-//ATK-ESP8266 WIFI模块 WIFI STA驱动代码	   
-//正点原子@ALIENTEK
-//技术论坛:www.openedv.com
-//修改日期:2015/4/3
-//版本：V1.0
-//版权所有，盗版必究。
-//Copyright(C) 广州市星翼电子科技有限公司 2009-2019
-//All rights reserved									  
-/////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 
-//ATK-ESP8266 WIFI STA测试
-//用于测试TCP/UDP连接
-//返回值:0,正常
-//    其他,错误代码
-extern u8 led0sta;
-u8 atk_8266_wifista_test(void)
+//连接端口号:8086,可自行修改为其他端口.
+const u8* portnum="8080";		 
+
+//WIFI STA模式,设置要去连接的路由器无线参数,请根据你自己的路由器设置,自行修改.
+const u8* wifista_ssid="TP-LINK_669D";			//路由器SSID号
+const u8* wifista_encryption="wpawpa2_aes";	//wpa/wpa2 aes加密方式
+const u8* wifista_password="7071727370717273jl"; 	//连接密码
+
+//自定义测试函数
+void test_esp8266(void) {
+//	u16 rlen=0;
+	u8 key;
+	u8 timex;
+	POINT_COLOR=RED;
+	printf("进入自定义test_esp8266函数\r\n");
+	Show_Str_Mid(0,30,"ATK-ESP8266 WIFI模块测试",16,240); 
+	while(atk_8266_send_cmd("AT","OK",20))//检查WIFI模块是否在线
+	{
+		atk_8266_quit_trans();//退出透传
+		atk_8266_send_cmd("AT+CIPMODE=0","OK",200);  //关闭透传模式	
+		Show_Str(40,55,200,16,"未检测到模块!!!",16,0);
+		delay_ms(800);
+		LCD_Fill(40,55,200,55+16,WHITE);
+		Show_Str(40,55,200,16,"尝试连接模块...",16,0); 
+	} 
+		while(atk_8266_send_cmd("ATE0","OK",20));//关闭回显
+		atk_8266_mtest_ui(32,30);
+	//此处为选择STA模式
+//	while(1)
+//	{
+		delay_ms(10); 
+		atk_8266_at_response(1);//检查ATK-ESP8266模块发送过来的数据,及时上传给电脑
+		key=KEY_Scan(0);
+		LCD_Clear(WHITE);
+		POINT_COLOR=RED;
+		Show_Str_Mid(0,30,"ATK-ESP WIFI-STA 测试",16,240);
+		Show_Str_Mid(0,50,"正在配置ATK-ESP8266模块，请稍等...",12,240);
+		test_sta();//WIFI STA测试
+		atk_8266_mtest_ui(32,30);
+		timex=0;
+		if((timex%20)==0)LED0_Toggle;//200ms闪烁 
+		timex++;	 
+//	} 
+	printf("运行结束：自定义test_esp8266函数\r\n");
+}
+
+//进入STA模式，连接路由器
+u8 test_sta(void)
 {
-  u8 netpro=0;	//网络模式
+	u8 test_ip[16] = "1.15.96.152";
+	u8 *test_str;
+  u8 netpro=1;	//网络模式
 	u8 key;
 	u8 timex=0; 
 	u8 ipbuf[16]; 	//IP缓存
@@ -41,32 +72,27 @@ u8 atk_8266_wifista_test(void)
 	sprintf((char*)p,"AT+CWJAP=\"%s\",\"%s\"",wifista_ssid,wifista_password);//设置无线参数:ssid,密码
 	while(atk_8266_send_cmd(p,"WIFI GOT IP",300));					//连接目标路由器,并且获得IP
 PRESTA:
-	netpro|=atk_8266_netpro_sel(50,30,(u8*)ATK_ESP8266_CWMODE_TBL[0]);	//选择网络模式
-	if(netpro&0X02)   //UDP
-	{
-				LCD_Clear(WHITE);
-				POINT_COLOR=RED;
-				Show_Str_Mid(0,30,"ATK-ESP WIFI-STA 测试",16,240); 
-				Show_Str(30,50,200,16,"正在配置ATK-ESP模块,请稍等...",12,0);
-				if(atk_8266_ip_set("WIFI-STA 远端UDP IP设置",(u8*)ATK_ESP8266_WORKMODE_TBL[netpro],(u8*)portnum,ipbuf))goto PRESTA;	//IP输入
-				sprintf((char*)p,"AT+CIPSTART=\"UDP\",\"%s\",%s",ipbuf,(u8*)portnum);    //配置目标UDP服务器
-				delay_ms(200);
-				atk_8266_send_cmd("AT+CIPMUX=0","OK",20);  //单链接模式
-				delay_ms(200);
-				LCD_Clear(WHITE);
-				while(atk_8266_send_cmd(p,"OK",500));
-	}
-	else     //TCP
-	{
-		if(netpro&0X01)     //TCP Client    透传模式测试
-		{
+	//不使用按键选择函数
+	//netpro|=atk_8266_netpro_sel(50,30,(u8*)ATK_ESP8266_CWMODE_TBL[0]);	//选择网络模式
+	sprintf((char*)test_str, "%s", &netpro);
+	printf(ipbuf);
+	printf(test_ip);
+	printf(test_str);
+	printf("%d",netpro);
+	printf("为IP地址\r\n");
+	
+			//自动选择TCP Client模式
 			LCD_Clear(WHITE);
 			POINT_COLOR=RED;
 			Show_Str_Mid(0,30,"ATK-ESP WIFI-STA 测试",16,240); 
 			Show_Str(30,50,200,16,"正在配置ATK-ESP模块,请稍等...",12,0);
-			if(atk_8266_ip_set("WIFI-STA 远端IP设置",(u8*)ATK_ESP8266_WORKMODE_TBL[netpro],(u8*)portnum,ipbuf))goto PRESTA;	//IP输入
+			//取消为0返回的跳转
+			//if(atk_8266_ip_set("WIFI-STA 远端IP设置",(u8*)ATK_ESP8266_WORKMODE_TBL[netpro],(u8*)portnum,ipbuf))goto PRESTA;	//IP输入
 			atk_8266_send_cmd("AT+CIPMUX=0","OK",20);   //0：单连接，1：多连接
-			sprintf((char*)p,"AT+CIPSTART=\"TCP\",\"%s\",%s",ipbuf,(u8*)portnum);    //配置目标TCP服务器
+			
+			//更改为自定义服务器IP
+			sprintf((char*)p,"AT+CIPSTART=\"TCP\",\"%s\",%s",test_ip,(u8*)portnum);    //配置目标TCP服务器
+			//sprintf((char*)p,"AT+CIPSTART=\"TCP\",\"%s\",%s",ipbuf,(u8*)portnum);    //配置目标TCP服务器
 			while(atk_8266_send_cmd(p,"OK",200))
 			{
 					LCD_Clear(WHITE);
@@ -76,25 +102,14 @@ PRESTA:
 					key=KEY_Scan(0);
 					if(key==WKUP_PRES)goto PRESTA;
 			}	
-			atk_8266_send_cmd("AT+CIPMODE=1","OK",200);      //传输模式为：透传			
-		}
-		else					//TCP Server
-		{
-				LCD_Clear(WHITE);
-				POINT_COLOR=RED;
-				Show_Str_Mid(0,30,"ATK-ESP WIFI-STA 测试",16,240); 
-				Show_Str(30,50,200,16,"正在配置ATK-ESP模块,请稍等...",12,0);
-				atk_8266_send_cmd("AT+CIPMUX=1","OK",20);   //0：单连接，1：多连接
-				sprintf((char*)p,"AT+CIPSERVER=1,%s",(u8*)portnum);    //开启Server模式(0，关闭；1，打开)，端口号为portnum
-				atk_8266_send_cmd(p,"OK",50);    
-		}
-	}
+			atk_8266_send_cmd("AT+CIPMODE=1","OK",200);      //传输模式为：透传
+			
 			LCD_Clear(WHITE);
 			POINT_COLOR=RED;
 			Show_Str_Mid(0,30,"ATK-ESP WIFI-STA 测试",16,240);
 			Show_Str(30,50,200,16,"正在配置ATK-ESP模块,请稍等...",12,0);			
 			LCD_Fill(30,50,239,50+12,WHITE);			//清除之前的显示
-			Show_Str(30,50,200,16,"WK_UP:退出测试  KEY0:发送数据",12,0);
+			Show_Str(30,50,200,16,"WK_UP:退出测试  KEY1:发送数据",12,0);
 			LCD_Fill(30,80,239,80+12,WHITE);
 			atk_8266_get_wanip(ipbuf);//服务器模式,获取WAN IP
 			sprintf((char*)p,"IP地址:%s 端口:%s",ipbuf,(u8*)portnum);
@@ -107,50 +122,21 @@ PRESTA:
 			POINT_COLOR=BLUE;
 			Show_Str(120+30,80,200,12,(u8*)ATK_ESP8266_WORKMODE_TBL[netpro],12,0); 		//连接状态
 			USART3_RX_STA=0;
-			while(1)
-			{
-				key=KEY_Scan(0);
-				if(key==WKUP_PRES)			//WK_UP 退出测试		 
-				{ 
-					res=0;					
-					atk_8266_quit_trans();	//退出透传
-					atk_8266_send_cmd("AT+CIPMODE=0","OK",20);   //关闭透传模式
-					break;												 
-				}
-				else if(key==KEY0_PRES)	//KEY0 发送数据 
-				{
-				
-					if((netpro==3)||(netpro==2))   //UDP
-					{
-						sprintf((char*)p,"ATK-8266%s测试%02d\r\n",ATK_ESP8266_WORKMODE_TBL[netpro],t/10);//测试数据
-						Show_Str(30+54,100,200,12,p,12,0);
-						atk_8266_send_cmd("AT+CIPSEND=25","OK",200);  //发送指定长度的数据
-						delay_ms(200);
-						atk_8266_send_data(p,"OK",100);  //发送指定长度的数据
-						timex=100;
-					}
-					else if((netpro==1))   //TCP Client
-					{
+//			while(1)
+//			{
 						atk_8266_quit_trans();
 						atk_8266_send_cmd("AT+CIPSEND","OK",20);         //开始透传           
 						sprintf((char*)p,"ATK-8266%s测试%d\r\n",ATK_ESP8266_WORKMODE_TBL[netpro],t/10);//测试数据
 						Show_Str(30+54,100,200,12,p,12,0);
 						u3_printf("%s",p);
 						timex=100;
-					}
-					else    //TCP Server
-					{
-						sprintf((char*)p,"ATK-8266%s测试%02d\r\n",ATK_ESP8266_WORKMODE_TBL[netpro],t/10);//测试数据
-						Show_Str(30+54,100,200,12,p,12,0);
-						atk_8266_send_cmd("AT+CIPSEND=0,25","OK",200);  //发送指定长度的数据
-						delay_ms(200);
-						atk_8266_send_data(p,"OK",100);  //发送指定长度的数据
-						timex=100;
-					}
-				}else;
 			
 				if(timex)timex--;
-				if(timex==1)LCD_Fill(30+54,100,239,112,WHITE);
+				if(timex==1) {
+					LCD_Fill(30+54,100,239,112,WHITE);
+					printf("%d",netpro);
+					printf("为netpro状态\r\n");
+				}
 				t++;
 				delay_ms(10);
 				if(USART3_RX_STA&0X8000)		//接收到一次数据了
@@ -180,35 +166,7 @@ PRESTA:
 				}
 				if((t%20)==0)LED0_Toggle;
 				atk_8266_at_response(1);
-			}
+//			}
 	myfree(SRAMIN,p);		//释放内存 
 	return res;		
-} 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}

@@ -1,52 +1,61 @@
+# Created by https://www.toptal.com/developers/gitignore/api/keil
+# Edit at https://www.toptal.com/developers/gitignore?templates=keil
+
+### Keil ###
+# something maybe need to add
+# *.bat  # generate batch file
+# output/project_name # uv project generate without file ext
+# *.SRC # generate source file
+# *.src
+
 # Prerequisites
 *.d
-
+*.dep
 # Object files
 *.o
-*.ko
 *.obj
-*.elf
+*.OBJ
 
-# Linker output
-*.ilk
+# Listing Files
+*.COD
+*.cod
+*.[Ii]
+*.LST
+*.lst
+*.MAP
 *.map
-*.exp
+*.[Mm]51
+*.[Mm]66
+*.SCR
+*.scr
 
-# Precompiled Headers
-*.gch
-*.pch
+# LINK output
+*.ABS
 
 # Libraries
 *.lib
-*.a
-*.la
-*.lo
+*.LIB
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
+# uv output
+*.lnp
+*.build_log.htm
+*.HEX
 *.hex
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# Build Files
+*._IA
+*.__[Ii]
+*._[Ii][Ii]
+
+# project
+*.uvgui.*
+*.uvguix.*
+
+
+# End of https://www.toptal.com/developers/gitignore/api/keil
+
+# 忽略输出文件夹下的所有文件
+/OBJ
+/USER/DebugConfig

@@ -58,12 +58,7 @@ u8 atk_8266_wifista_test(void);	//WIFI STA测试
 u8 atk_8266_wifiap_test(void);	//WIFI AP测试
 
 //用户配置参数
-extern const u8* portnum;			//连接端口
  
-extern const u8* wifista_ssid;		//WIFI STA SSID
-extern const u8* wifista_encryption;//WIFI STA 加密方式
-extern const u8* wifista_password; 	//WIFI STA 密码
-
 extern const u8* wifiap_ssid;		//WIFI AP SSID
 extern const u8* wifiap_encryption;	//WIFI AP 加密方式
 extern const u8* wifiap_password; 	//WIFI AP 密码

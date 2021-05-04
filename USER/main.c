@@ -19,6 +19,7 @@
 #include "text.h"
 #include "touch.h"
 #include "common.h"
+#include "test_esp8266.h"
 /************************************************
  ALIENTEK 阿波罗STM32F767开发板扩展实验13
  ATK-ESP8266 WIFI模块测试实验-HAL库函数版
@@ -88,5 +89,10 @@ int main(void)
 		delay_ms(1500);	
 		LCD_Clear(WHITE);//清屏	       
 	}
- 	atk_8266_test();		//进入ATK_ESP8266测试	 
+	printf("main函数运行开始\r\n");
+	test_esp8266();
+	LCD_Clear(WHITE); //清屏
+	//printf("atk_8266_test()函数运行开始\r\n");
+ 	//atk_8266_test();		//进入ATK_ESP8266测试	 
+	printf("main函数运行完成\r\n");
 }
