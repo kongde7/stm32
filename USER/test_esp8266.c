@@ -39,7 +39,7 @@ void test_esp8266(void) {
 		Show_Str_Mid(0,30,"ATK-ESP WIFI-STA 测试",16,240);
 		Show_Str_Mid(0,50,"正在配置ATK-ESP8266模块，请稍等...",12,240);
 		test_sta();//WIFI STA测试
-		atk_8266_mtest_ui(32,30);
+		//atk_8266_mtest_ui(32,30);
 		timex=0;
 		if((timex%20)==0)LED0_Toggle;//200ms闪烁 
 		timex++;	 
