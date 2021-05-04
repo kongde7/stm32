@@ -4,22 +4,25 @@
 #include "led.h"
 #include "key.h"
 #include "lcd.h"
-#include "qspi.h"
+//#include "qspi.h"
 #include "mpu.h" 
-#include "string.h"
+//#include "string.h"
 #include "sdram.h"
-#include "malloc.h"
-#include "w25qxx.h"
-#include "ff.h"
+//#include "malloc.h"
+//#include "w25qxx.h"
+//#include "ff.h"
 #include "exfuns.h"
-#include "string.h"
+//#include "string.h"
 #include "usmart.h"
 #include "sdmmc_sdcard.h"
-#include "fontupd.h"
-#include "text.h"
-#include "touch.h"
+//#include "fontupd.h"
+//#include "text.h"
+//#include "touch.h"
 #include "common.h"
 #include "test_esp8266.h"
+#include "mpu9250.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
 /************************************************
  ALIENTEK 阿波罗STM32F767开发板扩展实验13
  ATK-ESP8266 WIFI模块测试实验-HAL库函数版
@@ -32,6 +35,13 @@
     
 int main(void)
 {
+	u8 *hello;
+	u8 test_set = 22;
+	u8 test_get = 22;
+	u8 *test_change_set = "55.00";
+	u8 *test_change_get = "66.00";
+	unsigned long test_step_get;
+	unsigned long test_step_set = 998;
 	u8 key,fontok=0; 	
   Write_Through();                //开启强制透写！
   Cache_Enable();                 //打开L1-Cache
@@ -90,9 +100,33 @@ int main(void)
 		LCD_Clear(WHITE);//清屏	       
 	}
 	printf("main函数运行开始\r\n");
-	test_esp8266();
+	sprintf((char*)hello, "初始化结果：%d", MPU9250_Init());
+	printf("%s",(char *)hello);             	//初始化MPU9250
+	
+	//test_esp8266();
 	LCD_Clear(WHITE); //清屏
 	//printf("atk_8266_test()函数运行开始\r\n");
  	//atk_8266_test();		//进入ATK_ESP8266测试	 
+	
+	while(mpu_dmp_init())         
+   {   
+		LCD_ShowString(30,130,200,16,16,"MPU9250 Error");
+		delay_ms(200);
+		LCD_Fill(30,130,239,130+16,WHITE);
+ 		delay_ms(200);
+		LED0_Toggle;//DS0闪烁 
+   }
+	
+	test_set = dmp_set_pedometer_step_count(test_step_set);
+	sprintf((char*)test_change_set, "%ld", test_step_set);
+	printf("test_set：%d\r\n", test_set);
+	printf("test_change_set：%s\r\n", test_change_set);
+	while(1) {
+		delay_ms(1000);
+		test_get = dmp_get_pedometer_step_count(&test_step_get);
+		sprintf((char*)test_change_get, "%ld", test_step_get);
+		printf("test_get：%d\r\n", test_get);
+		printf("test_change_get：%s\r\n", test_change_get);
+	}
 	printf("main函数运行完成\r\n");
 }
