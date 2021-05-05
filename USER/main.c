@@ -23,6 +23,7 @@
 #include "mpu9250.h"
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
+#include "mlx90614.h"
 /************************************************
  ALIENTEK 阿波罗STM32F767开发板扩展实验13
  ATK-ESP8266 WIFI模块测试实验-HAL库函数版
@@ -35,6 +36,7 @@
     
 int main(void)
 {
+	float temperature;
 	u8 *cmd;
 	u8 *hello;
 	u8 test_set = 22;
@@ -104,7 +106,7 @@ int main(void)
 	sprintf((char*)hello, "初始化结果：%d", MPU9250_Init());
 	printf("%s",(char *)hello);             	//初始化MPU9250
 	
-	test_esp8266();
+	//test_esp8266();
 	LCD_Clear(WHITE); //清屏
 	printf("atk_8266_test()函数运行开始\r\n");
  	//atk_8266_test();		//进入ATK_ESP8266测试	 
@@ -117,7 +119,10 @@ int main(void)
  		delay_ms(200);
 		LED0_Toggle;//DS0闪烁 
    }
-	
+	 
+	//体温初始化
+	MLX90614init();
+	 
 	test_set = dmp_set_pedometer_step_count(test_step_set);
 	sprintf((char*)test_change_set, "%ld", test_step_set);
 	printf("test_set：%d\r\n", test_set);
@@ -131,7 +136,11 @@ int main(void)
 		printf("test_get：%d\r\n", test_get);
 		printf("test_change_get：%s\r\n", test_change_get);
 		
+		//获取体温数据
+		temperature = MLX90614_ReadTemp(0x00, 0x07);
+		
 		//向服务器发送数据
+		printf("TEM:%f\n", temperature);
 		u3_printf("{\"type\":\"sport\", \"value\":%ld, \"value2\":%s}\r\n", test_step_get, test_change_get);	//发送命令
 	}
 	printf("main函数运行完成\r\n");
