@@ -35,11 +35,12 @@
     
 int main(void)
 {
+	u8 *cmd;
 	u8 *hello;
 	u8 test_set = 22;
 	u8 test_get = 22;
-	u8 *test_change_set = "55.00";
-	u8 *test_change_get = "66.00";
+	u32 *test_change_set = (u32*)55;
+	u32 *test_change_get = (u32*)66;
 	unsigned long test_step_get;
 	unsigned long test_step_set = 998;
 	u8 key,fontok=0; 	
@@ -103,9 +104,9 @@ int main(void)
 	sprintf((char*)hello, "初始化结果：%d", MPU9250_Init());
 	printf("%s",(char *)hello);             	//初始化MPU9250
 	
-	//test_esp8266();
+	test_esp8266();
 	LCD_Clear(WHITE); //清屏
-	//printf("atk_8266_test()函数运行开始\r\n");
+	printf("atk_8266_test()函数运行开始\r\n");
  	//atk_8266_test();		//进入ATK_ESP8266测试	 
 	
 	while(mpu_dmp_init())         
@@ -121,12 +122,17 @@ int main(void)
 	sprintf((char*)test_change_set, "%ld", test_step_set);
 	printf("test_set：%d\r\n", test_set);
 	printf("test_change_set：%s\r\n", test_change_set);
+	atk_8266_quit_trans();
+	atk_8266_send_cmd("AT+CIPSEND","OK",20);         //开始透传    
 	while(1) {
 		delay_ms(1000);
 		test_get = dmp_get_pedometer_step_count(&test_step_get);
 		sprintf((char*)test_change_get, "%ld", test_step_get);
 		printf("test_get：%d\r\n", test_get);
 		printf("test_change_get：%s\r\n", test_change_get);
+		
+		//向服务器发送数据
+		u3_printf("{\"type\":\"sport\", \"value\":%ld, \"value2\":%s}\r\n", test_step_get, test_change_get);	//发送命令
 	}
 	printf("main函数运行完成\r\n");
 }
